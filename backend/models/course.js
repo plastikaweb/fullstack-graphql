@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
+import uuid from 'uuid';
 
 const Schema = mongoose.Schema;
 
 const courseSchema = new Schema({
-  id: String,
+  id: { type: String, default: uuid.v1 },
   title: String,
   author: String,
   description: String,

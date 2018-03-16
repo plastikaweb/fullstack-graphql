@@ -36,23 +36,51 @@ var coursesData = [
 
 const resolvers = {
   Query: {
-    allCourses: (root, { searchTerm }) => coursesData,
+    allCourses: (root, { searchTerm }) => {
+      // coursesData
+      if (searchTerm !== '') {
+        return courseModel
+          .find({ $text: { $search: searchTerm } })
+          .sort({ voteCount: 'desc' });
+      } else {
+        return courseModel.find().sort({ voteCount: 'desc' });
+      }
+    },
     course: (root, { id }) => {
-      return coursesData.filter(course => course.id === id)[0];
-      // return courseModel.findOne({ id });
+      // return coursesData.filter(course => course.id === id)[0];
+      return courseModel.findOne({ id });
     }
   },
   Mutation: {
-    addCourse: (root, { title, author, description, topic, url }) => null,
     upVote: (root, { id }) => {
-      const course = coursesData.filter(course => course.id === id)[0];
-      course.voteCount++;
-      return course;
+      // const course = coursesData.filter(course => course.id === id)[0];
+      // course.voteCount++;
+      // return course;
+      return courseModel.findOneAndUpdate(
+        { id },
+        { $inc: { voteCount: 1 } },
+        { returnNewDocument: true }
+      );
     },
     downVote: (root, { id }) => {
-      const course = coursesData.filter(course => course.id === id)[0];
-      course.voteCount--;
-      return course;
+      // const course = coursesData.filter(course => course.id === id)[0];
+      // course.voteCount--;
+      // return course;
+      return courseModel.findOneAndUpdate(
+        { id },
+        { $inc: { voteCount: -1 } },
+        { returnNewDocument: true }
+      );
+    },
+    addCourse: (root, { title, author, description, topic, url }) => {
+      const course = new courseModel({
+        title,
+        author,
+        description,
+        topic,
+        url
+      });
+      return course.save();
     }
   }
 };
